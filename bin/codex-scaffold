@@ -1,0 +1,157 @@
+#!/usr/bin/env sh
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+ROOT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+TEMPLATES_DIR="$ROOT_DIR/templates"
+BASE_TEMPLATE="$TEMPLATES_DIR/base"
+
+TARGET_DIR="."
+PROJECT_NAME=""
+FORCE=0
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ./bin/codex-scaffold [target-dir] [--project-name <name>] [--force]
+
+Options:
+  --project-name <name>  Display name used in rendered files. Defaults to target directory name.
+  --force                Overwrite files that already exist.
+  --help                 Show this help text.
+EOF
+}
+
+slugify() {
+  printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9][^a-z0-9]*/-/g; s/^-//; s/-$//'
+}
+
+escape_sed() {
+  printf '%s' "$1" | sed 's/[&|\\]/\\&/g'
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --project-name)
+      [ "$#" -ge 2 ] || {
+        echo "Missing value for --project-name" >&2
+        exit 1
+      }
+      PROJECT_NAME="$2"
+      shift 2
+      ;;
+    --force)
+      FORCE=1
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+    *)
+      TARGET_DIR="$1"
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$PROJECT_NAME" ]; then
+  PROJECT_NAME=$(basename "$(CDPATH= cd -- "$TARGET_DIR" 2>/dev/null && pwd || printf '%s' "$TARGET_DIR")")
+fi
+
+PROJECT_SLUG=$(slugify "$PROJECT_NAME")
+[ -n "$PROJECT_SLUG" ] || PROJECT_SLUG="project"
+
+if [ ! -d "$BASE_TEMPLATE" ]; then
+  echo "Missing base template directory: $BASE_TEMPLATE" >&2
+  exit 1
+fi
+
+ESC_PROJECT_NAME=$(escape_sed "$PROJECT_NAME")
+ESC_PROJECT_SLUG=$(escape_sed "$PROJECT_SLUG")
+
+render_string() {
+  # Render placeholders in directory and file names.
+  printf '%s' "$1" | sed \
+    -e "s|__PROJECT_NAME__|$ESC_PROJECT_NAME|g" \
+    -e "s|__PROJECT_SLUG__|$ESC_PROJECT_SLUG|g"
+}
+
+render_file() {
+  # Render placeholders inside copied template files.
+  sed \
+    -e "s|__PROJECT_NAME__|$ESC_PROJECT_NAME|g" \
+    -e "s|__PROJECT_SLUG__|$ESC_PROJECT_SLUG|g" \
+    "$1"
+}
+
+copy_tree() {
+  src_root="$1"
+
+  dir_list=$(mktemp)
+  file_list=$(mktemp)
+  trap 'rm -f "$dir_list" "$file_list"' EXIT HUP INT TERM
+
+  find "$src_root" -mindepth 1 -type d | LC_ALL=C sort >"$dir_list"
+  # Validate the full destination tree before creating anything.
+  while IFS= read -r dir_path; do
+    rel_path=${dir_path#"$src_root"/}
+    out_path=$(render_string "$rel_path")
+    out_dir="$TARGET_DIR/$out_path"
+
+    if [ -e "$out_dir" ] && [ ! -d "$out_dir" ]; then
+      echo "Refusing to replace non-directory path: $out_dir" >&2
+      exit 1
+    fi
+  done <"$dir_list"
+
+  find "$src_root" -type f | LC_ALL=C sort >"$file_list"
+  while IFS= read -r file_path; do
+    rel_path=${file_path#"$src_root"/}
+    out_rel=$(render_string "$rel_path")
+    out_file="$TARGET_DIR/$out_rel"
+
+    if [ -d "$out_file" ]; then
+      echo "Refusing to replace directory with file: $out_file" >&2
+      exit 1
+    fi
+
+    if [ -e "$out_file" ] && [ "$FORCE" -ne 1 ]; then
+      echo "Refusing to overwrite existing file: $out_file" >&2
+      exit 1
+    fi
+  done <"$file_list"
+
+  # Only write after the collision checks have passed for every path.
+  mkdir -p "$TARGET_DIR"
+  while IFS= read -r dir_path; do
+    rel_path=${dir_path#"$src_root"/}
+    out_path=$(render_string "$rel_path")
+    mkdir -p "$TARGET_DIR/$out_path"
+  done <"$dir_list"
+
+  while IFS= read -r file_path; do
+    rel_path=${file_path#"$src_root"/}
+    out_rel=$(render_string "$rel_path")
+    out_file="$TARGET_DIR/$out_rel"
+
+    mkdir -p "$(dirname "$out_file")"
+    render_file "$file_path" >"$out_file"
+
+    if [ -x "$file_path" ]; then
+      chmod +x "$out_file"
+    fi
+  done <"$file_list"
+
+  rm -f "$dir_list" "$file_list"
+  trap - EXIT HUP INT TERM
+}
+
+copy_tree "$BASE_TEMPLATE"
+
+echo "Scaffolded '$PROJECT_NAME' into $TARGET_DIR."

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Project Maintainer"
+  short_description: "Scaffold and maintain this repository consistently"
+  default_prompt: "Use $project-maintainer to scaffold missing repo structure and keep project docs aligned with the code."
+
+policy:
+  allow_implicit_invocation: true
