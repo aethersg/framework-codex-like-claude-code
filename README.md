@@ -4,6 +4,12 @@ This repository is a base scaffold for making an empty repository Codex-ready.
 
 It is the template source, not the project you build in day to day.
 
+It can scaffold either:
+
+- an empty directory
+- an already initialized empty Git repository
+- a new directory that should be initialized as a Git repository during scaffolding
+
 ## What It Creates
 
 - `AGENTS.md` for repository-specific operating rules
@@ -79,14 +85,41 @@ Assume this scaffold repository is cloned at:
 /path/to/codex-project-scaffold
 ```
 
-### Scaffold Another Empty Repository
+All command examples below assume:
+
+```sh
+FRAMEWORK=/path/to/codex-project-scaffold
+```
+
+Basic syntax:
+
+```sh
+"$FRAMEWORK/bin/codex-scaffold" [target-dir] [--project-name <name>] [--force] [--git-init]
+```
+
+### Example 1: Scaffold A New Empty Directory With An Explicit Project Name
 
 ```sh
 FRAMEWORK=/path/to/codex-project-scaffold
 "$FRAMEWORK/bin/codex-scaffold" /path/to/empty-repo --project-name my-service
 ```
 
-### Scaffold The Current Directory
+### Example 2: Scaffold A New Git Repository In One Step
+
+```sh
+FRAMEWORK=/path/to/codex-project-scaffold
+"$FRAMEWORK/bin/codex-scaffold" /path/to/empty-repo --project-name my-service --git-init
+```
+
+### Example 3: Scaffold An Already Initialized Empty Git Repository
+
+```sh
+git init /path/to/empty-repo
+FRAMEWORK=/path/to/codex-project-scaffold
+"$FRAMEWORK/bin/codex-scaffold" /path/to/empty-repo --project-name my-service
+```
+
+### Example 4: Scaffold The Current Directory
 
 ```sh
 FRAMEWORK=/path/to/codex-project-scaffold
@@ -94,14 +127,46 @@ cd /path/to/empty-repo
 "$FRAMEWORK/bin/codex-scaffold" . --project-name my-service
 ```
 
-### Overwrite Existing Files
+### Example 5: Scaffold The Current Directory And Initialize Git At The Same Time
+
+```sh
+FRAMEWORK=/path/to/codex-project-scaffold
+mkdir -p /path/to/empty-repo
+cd /path/to/empty-repo
+"$FRAMEWORK/bin/codex-scaffold" . --project-name my-service --git-init
+```
+
+### Example 6: Let The Folder Name Become The Project Name
+
+If you omit `--project-name`, the script derives the project name from the target directory name.
+
+```sh
+FRAMEWORK=/path/to/codex-project-scaffold
+"$FRAMEWORK/bin/codex-scaffold" /path/to/inventory-service
+```
+
+In that case the generated project name becomes `inventory-service`.
+
+### Example 7: Use A Display Name That Differs From The Folder Name
+
+```sh
+FRAMEWORK=/path/to/codex-project-scaffold
+"$FRAMEWORK/bin/codex-scaffold" /path/to/inventory-service --project-name "Inventory Service"
+```
+
+In that case:
+
+- the displayed project name is `Inventory Service`
+- the generated slug becomes `inventory-service`
+
+### Example 8: Overwrite Existing Files
 
 ```sh
 FRAMEWORK=/path/to/codex-project-scaffold
 "$FRAMEWORK/bin/codex-scaffold" /path/to/repo --project-name my-service --force
 ```
 
-### Show Help
+### Example 9: Show Help
 
 From the scaffold source repository root:
 
@@ -112,8 +177,9 @@ From the scaffold source repository root:
 ## What Happens When You Run It
 
 1. The script copies everything from `templates/base/` into the target repository.
-2. It renders placeholders for `__PROJECT_NAME__` and `__PROJECT_SLUG__`.
-3. The target repository is left with the base Codex operating structure.
+2. If you pass `--git-init`, it initializes the target as a Git repository first.
+3. It renders placeholders for `__PROJECT_NAME__` and `__PROJECT_SLUG__`.
+4. The target repository is left with the base Codex operating structure.
 
 ## What Each Generated Part Is For
 
@@ -172,12 +238,12 @@ These are empty starting points for code and tests. You can keep them or documen
 6. Add any project-specific skills under `skills/`.
 7. Ask Codex to implement the first real slice of the project.
 
-## Example
+## Example Session
 
 ```sh
 mkdir -p /tmp/inventory-service
 FRAMEWORK=/path/to/codex-project-scaffold
-"$FRAMEWORK/bin/codex-scaffold" /tmp/inventory-service --project-name inventory-service
+"$FRAMEWORK/bin/codex-scaffold" /tmp/inventory-service --project-name inventory-service --git-init
 cd /tmp/inventory-service
 ```
 
@@ -218,4 +284,5 @@ The scaffold has been verified to:
 
 - print `--help`
 - scaffold a base-only repository into a temporary directory
+- initialize and scaffold a Git repository with `--git-init`
 - preserve the repo-owned skill and docs structure in the generated repository

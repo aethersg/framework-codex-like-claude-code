@@ -9,15 +9,17 @@ BASE_TEMPLATE="$TEMPLATES_DIR/base"
 TARGET_DIR="."
 PROJECT_NAME=""
 FORCE=0
+GIT_INIT=0
 
 usage() {
   cat <<'EOF'
 Usage:
-  ./bin/codex-scaffold [target-dir] [--project-name <name>] [--force]
+  ./bin/codex-scaffold [target-dir] [--project-name <name>] [--force] [--git-init]
 
 Options:
   --project-name <name>  Display name used in rendered files. Defaults to target directory name.
   --force                Overwrite files that already exist.
+  --git-init             Initialize the target directory as a Git repository if needed.
   --help                 Show this help text.
 EOF
 }
@@ -28,6 +30,15 @@ slugify() {
 
 escape_sed() {
   printf '%s' "$1" | sed 's/[&|\\]/\\&/g'
+}
+
+ensure_git_repo() {
+  # Reuse an existing repo when present; otherwise initialize a new one.
+  if git -C "$TARGET_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    return 0
+  fi
+
+  git -C "$TARGET_DIR" init >/dev/null
 }
 
 while [ "$#" -gt 0 ]; do
@@ -42,6 +53,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --force)
       FORCE=1
+      shift
+      ;;
+    --git-init)
+      GIT_INIT=1
       shift
       ;;
     --help|-h)
@@ -129,6 +144,9 @@ copy_tree() {
 
   # Only write after the collision checks have passed for every path.
   mkdir -p "$TARGET_DIR"
+  if [ "$GIT_INIT" -eq 1 ]; then
+    ensure_git_repo
+  fi
   while IFS= read -r dir_path; do
     rel_path=${dir_path#"$src_root"/}
     out_path=$(render_string "$rel_path")
