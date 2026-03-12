@@ -4,13 +4,31 @@ This repository is a base scaffold for making an empty repository Codex-ready.
 
 It is the template source, not the project you build in day to day.
 
-It can scaffold either:
+Use it when you want to start a new project in:
 
 - an empty directory
 - an already initialized empty Git repository
 - a new directory that should be initialized as a Git repository during scaffolding
 
-## What It Creates
+## Start Here
+
+If you are new to this project, this is the shortest path:
+
+```sh
+FRAMEWORK=/path/to/codex-project-scaffold
+"$FRAMEWORK/bin/codex-scaffold" /path/to/my-project --project-name "My Project" --git-init
+cd /path/to/my-project
+```
+
+Then open the generated repository in Codex and start with:
+
+```text
+Read AGENTS.md, .codex/project.yml, and the docs folder. Then help me set up this project for the first feature.
+```
+
+## What This Creates
+
+The scaffold creates:
 
 - `AGENTS.md` for repository-specific operating rules
 - `.codex/project.yml` for stable paths and commands
@@ -18,66 +36,94 @@ It can scaffold either:
 - `skills/` for repo-owned Codex skills
 - empty `src/` and `tests/` roots
 
-## Diagram: Source To Target
+## Use It With Codex
 
-```mermaid
-flowchart LR
-    A["This scaffold repository"] --> B["bin/codex-scaffold"]
-    C["templates/base"] --> B
-    B --> D["Empty target repository"]
-    D --> E["AGENTS.md"]
-    D --> F[".codex/"]
-    D --> G["docs/"]
-    D --> H["skills/"]
-    D --> I["src/ and tests/"]
-```
+The easiest mental model is:
 
-## Diagram: Generated Repository Shape
+- this scaffold prepares a repository for Codex
+- you then open the generated repository and do the actual project work there
 
-```mermaid
-flowchart TD
-    A["Generated repository"] --> B["AGENTS.md"]
-    A --> C[".codex/project.yml"]
-    A --> D["docs/"]
-    A --> E["skills/project-maintainer/"]
-    A --> F["src/"]
-    A --> G["tests/"]
-    D --> D1["project-brief.md"]
-    D --> D2["architecture.md"]
-    D --> D3["conventions.md"]
-    D --> D4["tasks.md"]
-    D --> D5["decisions/"]
-```
+### First-Time Workflow
 
-## Diagram: How Codex Uses It
+1. Create a new project folder or empty Git repository.
+2. Run this scaffold into that target.
+3. Open the generated repository in Codex.
+4. Ask Codex to read the repo instructions and docs first.
+5. Fill in the project brief and architecture.
+6. Set the real `setup`, `run`, and `test` commands in `.codex/project.yml`.
+7. Start giving Codex real implementation tasks.
 
-```mermaid
-flowchart LR
-    A["Open repository"] --> B["Read AGENTS.md"]
-    B --> C["Read .codex/project.yml"]
-    C --> D["Read docs/ and matching skills/"]
-    D --> E["Implement in src/ and tests/"]
-    E --> F["Update docs and decisions"]
-    F --> G["Run checks from .codex/project.yml"]
-```
+### What To Fill In After Scaffolding
 
-## Structure
+These are the first files you should update:
 
-```text
-.
-|-- AGENTS.md
-|-- bin/
-|   `-- codex-scaffold
-`-- templates/
-    `-- base/
-        |-- .codex/
-        |-- docs/
-        |-- skills/
-        |-- src/
-        `-- tests/
-```
+- `docs/project-brief.md`
+- `docs/architecture.md`
+- `docs/conventions.md`
+- `docs/tasks.md`
+- `.codex/project.yml`
 
-## How To Use It
+### How Codex Should Work In The Generated Repo
+
+Codex should usually work in this order:
+
+1. Read `AGENTS.md`.
+2. Read `.codex/project.yml`.
+3. Read `docs/project-brief.md`, `docs/architecture.md`, `docs/conventions.md`, and `docs/tasks.md`.
+4. Use matching repo-owned skills from `skills/` when relevant.
+5. Implement code in `src/` and tests in `tests/`.
+6. Update docs when the project changes.
+
+### What You Need To Maintain Over Time
+
+To keep Codex effective, keep these current:
+
+- `docs/project-brief.md`
+- `docs/architecture.md`
+- `docs/tasks.md`
+- `.codex/project.yml`
+- any repo-specific skills in `skills/`
+
+## Use Multiple Codex Agents
+
+If you are a first-time user, start with one Codex agent first. That is the simplest way to learn the workflow.
+
+When you are ready to use multiple Codex agents, give each agent a narrow role and keep file ownership clear.
+
+### Safe Multi-Agent Rules
+
+- Do not let multiple agents edit the same files at the same time.
+- Give every agent the same starting context: `AGENTS.md`, `.codex/project.yml`, and the docs.
+- Use separate branches or separate Git worktrees for parallel work.
+- Merge their work through one final integration pass.
+- Re-run tests and update docs after merging.
+
+### Good First Multi-Agent Setup
+
+- Planner agent: updates `docs/project-brief.md`, `docs/architecture.md`, and `docs/tasks.md`
+- Builder agent: implements the feature in `src/` and `tests/`
+- Reviewer agent: checks the result, tests, and documentation alignment
+
+### Skills And Multiple Agents
+
+This scaffold already includes `skills/project-maintainer/`.
+
+If you later want a more specialized multi-agent setup, add more repo-owned skills such as:
+
+- `skills/planner`
+- `skills/backend-builder`
+- `skills/reviewer`
+
+Then each agent can be instructed to use the skill that matches its role.
+
+### Recommended Progression
+
+1. Start with one Codex agent.
+2. Build one real feature.
+3. Add a second agent for planning or review.
+4. Move to full parallel multi-agent work only after the repo structure and workflow feel stable.
+
+## Command Examples
 
 Assume this scaffold repository is cloned at:
 
@@ -97,60 +143,51 @@ Basic syntax:
 "$FRAMEWORK/bin/codex-scaffold" [target-dir] [--project-name <name>] [--force] [--git-init]
 ```
 
-### Example 1: Scaffold A New Empty Directory With An Explicit Project Name
+### New Empty Directory With An Explicit Project Name
 
 ```sh
-FRAMEWORK=/path/to/codex-project-scaffold
 "$FRAMEWORK/bin/codex-scaffold" /path/to/empty-repo --project-name my-service
 ```
 
-### Example 2: Scaffold A New Git Repository In One Step
+### New Git Repository In One Step
 
 ```sh
-FRAMEWORK=/path/to/codex-project-scaffold
 "$FRAMEWORK/bin/codex-scaffold" /path/to/empty-repo --project-name my-service --git-init
 ```
 
-### Example 3: Scaffold An Already Initialized Empty Git Repository
+### Existing Empty Git Repository
 
 ```sh
 git init /path/to/empty-repo
-FRAMEWORK=/path/to/codex-project-scaffold
 "$FRAMEWORK/bin/codex-scaffold" /path/to/empty-repo --project-name my-service
 ```
 
-### Example 4: Scaffold The Current Directory
+### Current Directory
 
 ```sh
-FRAMEWORK=/path/to/codex-project-scaffold
 cd /path/to/empty-repo
 "$FRAMEWORK/bin/codex-scaffold" . --project-name my-service
 ```
 
-### Example 5: Scaffold The Current Directory And Initialize Git At The Same Time
+### Current Directory With Git Initialization
 
 ```sh
-FRAMEWORK=/path/to/codex-project-scaffold
 mkdir -p /path/to/empty-repo
 cd /path/to/empty-repo
 "$FRAMEWORK/bin/codex-scaffold" . --project-name my-service --git-init
 ```
 
-### Example 6: Let The Folder Name Become The Project Name
+### Use The Folder Name As The Project Name
 
 If you omit `--project-name`, the script derives the project name from the target directory name.
 
 ```sh
-FRAMEWORK=/path/to/codex-project-scaffold
 "$FRAMEWORK/bin/codex-scaffold" /path/to/inventory-service
 ```
 
-In that case the generated project name becomes `inventory-service`.
-
-### Example 7: Use A Display Name That Differs From The Folder Name
+### Use A Display Name That Differs From The Folder Name
 
 ```sh
-FRAMEWORK=/path/to/codex-project-scaffold
 "$FRAMEWORK/bin/codex-scaffold" /path/to/inventory-service --project-name "Inventory Service"
 ```
 
@@ -159,14 +196,13 @@ In that case:
 - the displayed project name is `Inventory Service`
 - the generated slug becomes `inventory-service`
 
-### Example 8: Overwrite Existing Files
+### Overwrite Existing Files
 
 ```sh
-FRAMEWORK=/path/to/codex-project-scaffold
 "$FRAMEWORK/bin/codex-scaffold" /path/to/repo --project-name my-service --force
 ```
 
-### Example 9: Show Help
+### Show Help
 
 From the scaffold source repository root:
 
@@ -181,62 +217,99 @@ From the scaffold source repository root:
 3. It renders placeholders for `__PROJECT_NAME__` and `__PROJECT_SLUG__`.
 4. The target repository is left with the base Codex operating structure.
 
-## What Each Generated Part Is For
+## Generated Repository
 
-### `AGENTS.md`
+### Structure
 
-Tells Codex how to work in the generated repository:
+```text
+.
+|-- AGENTS.md
+|-- .codex/
+|   `-- project.yml
+|-- docs/
+|   |-- project-brief.md
+|   |-- architecture.md
+|   |-- conventions.md
+|   |-- tasks.md
+|   `-- decisions/
+|-- skills/
+|   `-- project-maintainer/
+|-- src/
+`-- tests/
+```
 
-- what files to read first
-- where code should live
-- what docs must stay in sync
-- when repo-owned skills should be used
+### What Each Part Is For
 
-### `.codex/project.yml`
+`AGENTS.md`
 
-This is the machine-readable repository index:
+- tells Codex how to work in the generated repository
+- defines what files to read first
+- explains where code and docs belong
 
-- source paths
-- test paths
-- docs paths
-- skill paths
-- setup, run, and test commands
+`.codex/project.yml`
 
-You fill in the commands once the project runtime is chosen.
+- acts as the machine-readable repository index
+- defines source, test, docs, and skill paths
+- holds the `setup`, `run`, and `test` commands
 
-### `docs/`
+`docs/`
 
-This is the long-lived project context:
+- stores the long-lived project context
+- keeps the project brief, architecture, conventions, and tasks in one place
 
-- `project-brief.md`
-- `architecture.md`
-- `conventions.md`
-- `tasks.md`
-- `decisions/`
+`skills/`
 
-### `skills/`
+- stores repo-owned Codex skills
+- starts with `skills/project-maintainer/`
 
-This is where repo-owned skills live.
+`src/` and `tests/`
 
-The base scaffold includes `skills/project-maintainer/`, which gives Codex a local workflow for:
+- provide empty starting points for code and tests
 
-- scaffolding sparse repos
-- keeping docs aligned with code
-- maintaining repository coherence during implementation
+## Diagrams
 
-### `src/` and `tests/`
+### Source To Target
 
-These are empty starting points for code and tests. You can keep them or document a different layout later.
+```mermaid
+flowchart LR
+    A["This scaffold repository"] --> B["bin/codex-scaffold"]
+    C["templates/base"] --> B
+    B --> D["Empty target repository"]
+    D --> E["AGENTS.md"]
+    D --> F[".codex/"]
+    D --> G["docs/"]
+    D --> H["skills/"]
+    D --> I["src/ and tests/"]
+```
 
-## Recommended Workflow After Scaffolding
+### Generated Repository Shape
 
-1. Open the generated repository.
-2. Fill in `docs/project-brief.md` with the real problem and goals.
-3. Fill in `docs/architecture.md` with the first intended design.
-4. Review `docs/conventions.md` and adjust it for the team.
-5. Set `setup`, `run`, and `test` in `.codex/project.yml`.
-6. Add any project-specific skills under `skills/`.
-7. Ask Codex to implement the first real slice of the project.
+```mermaid
+flowchart TD
+    A["Generated repository"] --> B["AGENTS.md"]
+    A --> C[".codex/project.yml"]
+    A --> D["docs/"]
+    A --> E["skills/project-maintainer/"]
+    A --> F["src/"]
+    A --> G["tests/"]
+    D --> D1["project-brief.md"]
+    D --> D2["architecture.md"]
+    D --> D3["conventions.md"]
+    D --> D4["tasks.md"]
+    D --> D5["decisions/"]
+```
+
+### How Codex Uses It
+
+```mermaid
+flowchart LR
+    A["Open repository"] --> B["Read AGENTS.md"]
+    B --> C["Read .codex/project.yml"]
+    C --> D["Read docs/ and matching skills/"]
+    D --> E["Implement in src/ and tests/"]
+    E --> F["Update docs and decisions"]
+    F --> G["Run checks from .codex/project.yml"]
+```
 
 ## Example Session
 
@@ -253,7 +326,7 @@ At that point the repository is ready for Codex. A normal next prompt would be:
 Read AGENTS.md and the docs, then scaffold the first API slice for inventory items.
 ```
 
-## Extending The Scaffold
+## Extend The Scaffold
 
 ### Add More Repo-Owned Skills
 
