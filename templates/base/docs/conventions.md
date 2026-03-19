@@ -18,3 +18,4 @@
 - Use repo-owned skills from `skills/` when they match the task.
 - If the repository is still sparse, scaffold the missing structure before adding deeper implementation.
 - Treat `.codex/project.yml` as the stable summary of commands and paths.
+- Treat `AGENTS.md` as the shared team rules file for Codex sessions and update it when a durable lesson emerges.

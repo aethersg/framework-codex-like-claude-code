@@ -2,6 +2,14 @@
 
 This repository is operated with Codex as the primary coding agent.
 
+## Shared Team Contract
+
+Treat this file as the shared operating contract for all Codex sessions in the repository.
+
+- Every Codex session should read this file first.
+- If the team learns a repeat lesson or recurring mistake, add the smallest durable rule that would have prevented it.
+- Keep rules short and operational here, and move longer rationale to `docs/decisions/` when needed.
+
 ## Start Here
 
 Before changing code, read:
@@ -21,6 +29,14 @@ Before changing code, read:
 - Prefer small, testable changes over broad speculative rewrites.
 - Run the relevant checks before finishing if commands are defined.
 - Use repo-owned skills from `skills/` when the task matches them.
+
+## Shared Mistakes And Lessons
+
+Use this file to capture team-wide rules that came from real mistakes.
+
+- Add short "do this, not that" rules when something repeats.
+- Prefer durable rules over one-off history.
+- Remove or rewrite rules that are no longer useful.
 
 ## Default Layout
 
