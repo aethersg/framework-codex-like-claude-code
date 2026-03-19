@@ -16,13 +16,15 @@ Before changing code, read:
 
 1. `.codex/project.yml`
 2. `docs/project-brief.md`
-3. `docs/architecture.md`
-4. `docs/conventions.md`
-5. `docs/tasks.md`
+3. `docs/plan.md`
+4. `docs/architecture.md`
+5. `docs/conventions.md`
+6. `docs/tasks.md`
 
 ## Expectations
 
 - Keep implementation aligned with `docs/project-brief.md`.
+- Update `docs/plan.md` when milestones, sequencing, or dependencies change.
 - Update `docs/architecture.md` when design or boundaries change.
 - Update `docs/conventions.md` when workflow or code conventions change.
 - Update `docs/tasks.md` when starting or finishing substantial work.

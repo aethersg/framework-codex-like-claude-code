@@ -23,7 +23,7 @@ cd /path/to/my-project
 Then open the generated repository in Codex and start with:
 
 ```text
-Read AGENTS.md, .codex/project.yml, and the docs folder. Then help me set up this project for the first feature.
+Read AGENTS.md, .codex/project.yml, docs/plan.md, and the rest of the docs. Then help me set up this project for the first feature.
 ```
 
 ## What This Creates
@@ -33,6 +33,7 @@ The scaffold creates:
 - `AGENTS.md` for repository-specific operating rules
 - `.codex/project.yml` for stable paths and commands
 - `docs/` for long-lived project context
+- `docs/plan.md` for milestones, sequencing, and dependencies
 - `skills/` for repo-owned Codex skills
 - empty `src/` and `tests/` roots
 
@@ -55,6 +56,15 @@ That means:
 - longer explanations can live in `docs/decisions/`, but the operational rule should still be summarized in `AGENTS.md`
 
 The goal is that one person's mistake becomes a rule that helps the whole team next time.
+
+### Plan Vs Tasks
+
+The scaffold now separates execution strategy from live status:
+
+- `docs/plan.md`: milestones, phases, sequencing, workstreams, and dependencies
+- `docs/tasks.md`: current backlog, in-progress work, and completed work
+
+That separation matters once a team is involved or one developer is running multiple Codex sessions. The plan explains how work should be sequenced. The task list shows what is actually moving right now.
 
 ### Shared Starter Prompt
 
@@ -97,10 +107,76 @@ This is the simplest mode and the best place to start.
 These are the first files you should update:
 
 - `docs/project-brief.md`
+- `docs/plan.md`
 - `docs/architecture.md`
 - `docs/conventions.md`
 - `docs/tasks.md`
 - `.codex/project.yml`
+
+### Prompt Order For One Person
+
+Use these prompts in order after generating the scaffold.
+
+1. Read-in prompt
+
+```text
+Read AGENTS.md first, then .codex/project.yml, docs/project-brief.md, docs/plan.md, docs/architecture.md, docs/conventions.md, and docs/tasks.md. Summarize what is missing before we start building.
+```
+
+2. Project brief prompt
+
+```text
+Help me fill docs/project-brief.md. Ask only the minimum questions needed, then draft the file with a clear problem, users, success criteria, and non-goals.
+```
+
+3. Plan prompt
+
+```text
+Draft docs/plan.md from the brief. Propose phases, milestones, dependencies, risks, and the next review point. Keep it practical and small.
+```
+
+4. Architecture prompt
+
+```text
+Draft docs/architecture.md to match the brief and plan. Keep the initial design minimal, name the main components, interfaces, and constraints, and call out what can wait.
+```
+
+5. Commands and conventions prompt
+
+```text
+Based on the chosen stack, update docs/conventions.md and fill setup, run, and test in .codex/project.yml. If the stack is still undecided, propose the smallest sensible default.
+```
+
+6. Task breakdown prompt
+
+```text
+Turn the plan into an initial docs/tasks.md with a small backlog, one in-progress slice, and clear done criteria for the first milestone.
+```
+
+7. First implementation prompt
+
+```text
+Implement the smallest useful first slice. Update src/, tests/, docs/tasks.md, and any other docs that changed. Stop and explain tradeoffs before making broad architectural choices.
+```
+
+8. Review and lessons prompt
+
+```text
+Review the changes, run the relevant checks, update docs/plan.md or docs/tasks.md if needed, and propose any durable AGENTS.md rule we learned.
+```
+
+### One-Person Prompt Flow
+
+```mermaid
+flowchart LR
+    A["Read repo context"] --> B["Draft project brief"]
+    B --> C["Draft plan"]
+    C --> D["Draft architecture"]
+    D --> E["Set commands and conventions"]
+    E --> F["Create tasks"]
+    F --> G["Implement first slice"]
+    G --> H["Review and capture lessons"]
+```
 
 ### How Codex Should Work In The Generated Repo
 
@@ -108,7 +184,7 @@ Codex should usually work in this order:
 
 1. Read `AGENTS.md`.
 2. Read `.codex/project.yml`.
-3. Read `docs/project-brief.md`, `docs/architecture.md`, `docs/conventions.md`, and `docs/tasks.md`.
+3. Read `docs/project-brief.md`, `docs/plan.md`, `docs/architecture.md`, `docs/conventions.md`, and `docs/tasks.md`.
 4. Use matching repo-owned skills from `skills/` when relevant.
 5. Implement code in `src/` and tests in `tests/`.
 6. Update docs when the project changes.
@@ -118,6 +194,7 @@ Codex should usually work in this order:
 To keep Codex effective, keep these current:
 
 - `docs/project-brief.md`
+- `docs/plan.md`
 - `docs/architecture.md`
 - `docs/tasks.md`
 - `.codex/project.yml`
@@ -140,9 +217,73 @@ If multiple developers use Codex in the same repository, the team needs one shar
 
 1. Keep `AGENTS.md` short and operational.
 2. Add rules only when they are durable and team-wide.
-3. Update `docs/tasks.md` so others can see what Codex is doing.
+3. Update `docs/plan.md` when the execution approach changes, and update `docs/tasks.md` so others can see what is active now.
 4. Review `AGENTS.md` changes the same way you review code changes.
 5. Remove stale rules when they stop being useful.
+
+### Prompt Order For Teams
+
+These prompts work well for a shared team setup.
+
+1. Shared read-in prompt
+
+```text
+Read AGENTS.md first, then .codex/project.yml, docs/project-brief.md, docs/plan.md, docs/architecture.md, docs/conventions.md, and docs/tasks.md. Propose any missing team-wide rules we should agree on before work starts.
+```
+
+2. Shared brief prompt
+
+```text
+Draft docs/project-brief.md for team review. Keep it concise and make scope, users, success criteria, and non-goals easy to challenge before implementation starts.
+```
+
+3. Shared plan prompt
+
+```text
+Draft docs/plan.md for team review. Split the work into phases, milestones, workstreams, dependencies, and risks. Make the workstreams small enough for separate developers or Codex sessions to own.
+```
+
+4. Shared architecture prompt
+
+```text
+Draft docs/architecture.md for the first milestone. Mark what is decided now, what stays intentionally open, and what should not be built yet.
+```
+
+5. Shared work split prompt
+
+```text
+Turn the current plan into docs/tasks.md with the first backlog, the next in-progress slice, and file ownership guidance for parallel work. Keep overlapping file edits to a minimum.
+```
+
+6. Shared skills prompt
+
+```text
+Propose any repo-owned skills under skills/ that the whole team should share for recurring workflows. Only suggest skills that are clearly reusable across multiple developers.
+```
+
+7. Developer or agent execution prompt
+
+```text
+Read AGENTS.md, .codex/project.yml, docs/plan.md, and the relevant docs first. Own only these files: <paths>. Implement only task <task-name>, update docs/tasks.md with progress, and propose an AGENTS.md update if you find a repeat lesson.
+```
+
+8. Integration prompt
+
+```text
+Review the current diff against the brief, plan, and architecture. Reconcile docs/tasks.md, update docs/plan.md if sequencing changed, and list any team-wide AGENTS.md rules we should add before merge.
+```
+
+### Team Prompt Flow
+
+```mermaid
+flowchart LR
+    A["Shared read-in"] --> B["Agree brief"]
+    B --> C["Agree plan"]
+    C --> D["Agree architecture"]
+    D --> E["Split work and assign ownership"]
+    E --> F["Developers or Codex sessions implement owned work"]
+    F --> G["Integrate, review, and update AGENTS.md"]
+```
 
 ### What To Put In `AGENTS.md`
 
@@ -160,14 +301,14 @@ Avoid putting these in `AGENTS.md`:
 - detailed architecture explanations
 - task-specific one-off instructions
 
-Those belong in `docs/decisions/`, `docs/architecture.md`, or `docs/tasks.md`.
+Those belong in `docs/decisions/`, `docs/architecture.md`, `docs/plan.md`, or `docs/tasks.md`.
 
 ### Team Flow
 
 ```mermaid
 flowchart LR
     A["Team member starts Codex session"] --> B["Read AGENTS.md"]
-    B --> C["Read .codex/project.yml and docs/"]
+    B --> C["Read .codex/project.yml, plan, and docs/"]
     C --> D["Do task"]
     D --> E{"Found repeat mistake or better rule?"}
     E -- "No" --> F["Open PR with code/docs changes"]
@@ -233,12 +374,12 @@ Use this when one person wants to split work into separate lanes.
 - give each session a narrow job
 - do not let two sessions edit the same files at the same time
 - use separate branches or separate Git worktrees if the sessions run in parallel
-- give every session the same starting context: `AGENTS.md`, `.codex/project.yml`, and the docs
+- give every session the same starting context: `AGENTS.md`, `.codex/project.yml`, `docs/plan.md`, and the rest of the docs
 - merge the results through one final review pass
 
 ### Good Single-Developer Multi-Session Split
 
-- Session 1: update `docs/project-brief.md`, `docs/architecture.md`, and `docs/tasks.md`
+- Session 1: update `docs/project-brief.md`, `docs/plan.md`, `docs/architecture.md`, and `docs/tasks.md`
 - Session 2: build the feature in `src/` and `tests/`
 - Session 3: review the result and check docs consistency
 
@@ -255,7 +396,7 @@ Avoid it when:
 
 ```mermaid
 flowchart LR
-    A["One developer starts multiple Codex sessions"] --> B["Each session reads AGENTS.md and docs/"]
+    A["One developer starts multiple Codex sessions"] --> B["Each session reads AGENTS.md, plan, and docs/"]
     B --> C["Session 1: planning/docs"]
     B --> D["Session 2: implementation"]
     B --> E["Session 3: review"]
@@ -278,7 +419,7 @@ If you are a first-time user, start with one Codex agent first. That is the simp
 When you are ready to use multiple Codex agents, give each agent a narrow role and keep file ownership clear.
 
 - Do not let multiple agents edit the same files at the same time.
-- Give every agent the same starting context: `AGENTS.md`, `.codex/project.yml`, and the docs.
+- Give every agent the same starting context: `AGENTS.md`, `.codex/project.yml`, `docs/plan.md`, and the rest of the docs.
 - Treat `AGENTS.md` as the shared operating contract for all agents.
 - Use separate branches or separate Git worktrees for parallel work.
 - Merge their work through one final integration pass.
@@ -286,7 +427,7 @@ When you are ready to use multiple Codex agents, give each agent a narrow role a
 
 ### Good First Multi-Agent Setup
 
-- Planner agent: updates `docs/project-brief.md`, `docs/architecture.md`, and `docs/tasks.md`
+- Planner agent: updates `docs/project-brief.md`, `docs/plan.md`, `docs/architecture.md`, and `docs/tasks.md`
 - Builder agent: implements the feature in `src/` and `tests/`
 - Reviewer agent: checks the result, tests, and documentation alignment
 
@@ -469,6 +610,7 @@ From the scaffold source repository root:
 |   `-- project.yml
 |-- docs/
 |   |-- project-brief.md
+|   |-- plan.md
 |   |-- architecture.md
 |   |-- conventions.md
 |   |-- tasks.md
@@ -498,7 +640,7 @@ From the scaffold source repository root:
 `docs/`
 
 - stores the long-lived project context
-- keeps the project brief, architecture, conventions, and tasks in one place
+- keeps the project brief, plan, architecture, conventions, and tasks in one place
 
 `skills/`
 
@@ -536,10 +678,11 @@ flowchart TD
     A --> F["src/"]
     A --> G["tests/"]
     D --> D1["project-brief.md"]
-    D --> D2["architecture.md"]
-    D --> D3["conventions.md"]
-    D --> D4["tasks.md"]
-    D --> D5["decisions/"]
+    D --> D2["plan.md"]
+    D --> D3["architecture.md"]
+    D --> D4["conventions.md"]
+    D --> D5["tasks.md"]
+    D --> D6["decisions/"]
 ```
 
 ### How Codex Uses It
@@ -566,7 +709,7 @@ cd /tmp/inventory-service
 At that point the repository is ready for Codex. A normal next prompt would be:
 
 ```text
-Read AGENTS.md and the docs, then scaffold the first API slice for inventory items.
+Read AGENTS.md, docs/plan.md, and the rest of the docs, then scaffold the first API slice for inventory items.
 ```
 
 ## Extend The Scaffold

@@ -11,6 +11,7 @@
 - Keep source code in `src/` unless the repository adopts a different documented layout.
 - Keep tests in `tests/`.
 - Record substantial design choices in `docs/decisions/`.
+- Update `docs/plan.md` when the sequencing, milestones, or dependencies change.
 - Update `docs/tasks.md` when work starts or finishes.
 
 ## Codex Usage

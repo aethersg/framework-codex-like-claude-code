@@ -18,6 +18,7 @@ commands:
 
 workflow:
   brief: "docs/project-brief.md"
+  plan: "docs/plan.md"
   architecture: "docs/architecture.md"
   conventions: "docs/conventions.md"
   tasks: "docs/tasks.md"
